@@ -55,7 +55,7 @@ export class NlwebTester {
     return Promise.all(promises);
   }
 
-  async testPageWithRetry(url: string, maxRetries: number = 3): Promise<TestResult> {
+  async testPageWithRetry(args:any): Promise<TestResult> {
     let lastResult: TestResult;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {

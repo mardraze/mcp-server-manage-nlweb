@@ -33,9 +33,11 @@ const SearchPagesSchema = z.object({
   query: z.string().min(1),
 });
 
-const TestPageSchema = z.object({
+const AskPageSchema = z.object({
   url: z.string().url(),
-  retries: z.number().int().min(1).max(5).optional().default(1),
+  query: z.string().min(1),
+  prev: z.string().optional(),
+  mode: z.enum(['summarize', 'generate']).optional()
 });
 
 class NlwebMcpServer {
@@ -139,25 +141,17 @@ class NlwebMcpServer {
             },
           },
           {
-            name: 'test_nlweb_page',
-            description: 'Test a nlweb page for accessibility and performance',
+            name: 'ask_nlweb_page',
+            description: 'Ask a nlweb page a question',
             inputSchema: {
               type: 'object',
               properties: {
-                url: { type: 'string', format: 'uri', description: 'URL to test' },
-                retries: { type: 'number', minimum: 1, maximum: 5, description: 'Number of retry attempts' },
+                url: { type: 'string', format: 'uri', description: 'URL of the nlweb page to ask' },
+                query: { type: 'string', description: 'Question to ask' },
               },
-              required: ['url'],
+              required: ['url', 'query'],
             },
-          },
-          {
-            name: 'health_check_all_pages',
-            description: 'Perform health check on all stored nlweb pages',
-            inputSchema: {
-              type: 'object',
-              properties: {},
-            },
-          },
+          }
         ],
       };
     });
@@ -318,54 +312,29 @@ class NlwebMcpServer {
             };
           }
 
-          case 'test_nlweb_page': {
-            const validated = TestPageSchema.parse(args);
-            const result = await this.tester.testPageWithRetry(validated.url, validated.retries);
-            
-            // Update database if page exists
-            const existingPage = await this.database.getPageByUrl(validated.url);
-            if (existingPage) {
-              await this.database.updatePage(existingPage.id!, {
-                status: result.status === 'success' ? 'active' : 'error',
-                lastChecked: result.timestamp,
-                responseTime: result.responseTime,
-                title: result.title || existingPage.title,
-                description: result.description || existingPage.description,
-                content: result.content || existingPage.content,
-              });
+          case 'ask_nlweb_page': {
+            const validated = AskPageSchema.parse(args);
+            const url = validated.url
+            const payload = {
+              query: validated.query,
+              prev: validated.prev,
+              mode: validated.mode,
             }
+            const result = await fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payload),
+            });
+            
+            const json = await result.json();
 
             return {
               content: [
                 {
                   type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'health_check_all_pages': {
-            const pages = await this.database.getAllPages();
-            const healthCheck = await this.tester.performHealthCheck(pages);
-            
-            // Update database with test results
-            for (const result of healthCheck.results) {
-              const page = pages.find(p => p.url === result.url);
-              if (page) {
-                await this.database.updatePage(page.id!, {
-                  status: result.status === 'success' ? 'active' : 'error',
-                  lastChecked: result.timestamp,
-                  responseTime: result.responseTime,
-                });
-              }
-            }
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(healthCheck, null, 2),
+                  text: JSON.stringify(json, null, 2),
                 },
               ],
             };
