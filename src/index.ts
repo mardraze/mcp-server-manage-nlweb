@@ -8,8 +8,7 @@ import {
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { Database, NlwebPage } from './database.js';
-import { NlwebTester, TestResult } from './nlweb-tester.js';
+import { Database } from './database.js';
 import { z } from 'zod';
 
 // Validation schemas
@@ -43,7 +42,6 @@ const AskPageSchema = z.object({
 class NlwebMcpServer {
   private server: Server;
   private database: Database;
-  private tester: NlwebTester;
 
   constructor() {
     this.server = new Server(
@@ -60,7 +58,6 @@ class NlwebMcpServer {
     );
 
     this.database = new Database();
-    this.tester = new NlwebTester();
     this.setupHandlers();
   }
 
@@ -327,7 +324,7 @@ class NlwebMcpServer {
               },
               body: JSON.stringify(payload),
             });
-            
+
             const json = await result.json();
 
             return {
