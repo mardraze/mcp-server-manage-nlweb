@@ -1,5 +1,5 @@
 {
-  "name": "nlweb-mcp-server",
+  "name": "mcp-server-manage-nlweb",
   "version": "1.0.0",
   "description": "MCP server for managing nlweb pages with SQLite storage",
   "main": "dist/index.js",
