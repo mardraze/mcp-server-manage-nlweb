@@ -6,36 +6,8 @@ MCP (Model Context Protocol) server for managing nlweb pages with SQLite databas
 
 - **Page Management**: Add, update, delete, and search nlweb pages
 - **SQLite Storage**: Persistent storage in user's home directory (`~/.nlweb-mcp/nlweb.db`)
-- **Page Testing**: Test page accessibility, performance, and extract content
-- **Health Monitoring**: Bulk health checks for all stored pages
 - **Resource Access**: Access page data through MCP resources
 
-## Installation
-
-1. Clone or download this repository
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Build the project:
-```bash
-npm run build
-```
-
-## Usage
-
-### Running the Server
-
-For development:
-```bash
-npm run dev
-```
-
-For production:
-```bash
-npm start
-```
 
 ### Integration with Claude Desktop
 
@@ -48,15 +20,16 @@ Add this configuration to your Claude Desktop config file:
 {
   "mcpServers": {
     "nlweb": {
-      "command": "node",
-      "args": ["D:\\path\\to\\nlweb-mcp\\dist\\index.js"],
-      "env": {}
+      "command": "npx",
+      "args": [
+        "-y", "mcp-server-manage-nlweb"
+      ]
     }
   }
 }
 ```
 
-Replace `D:\\path\\to\\nlweb-mcp` with the actual path to your project.
+This will automatically use the published `mcp-server-manage-nlweb` package via NPX, so you do not need to specify a local path.
 
 ## Available Tools
 
@@ -64,15 +37,14 @@ Replace `D:\\path\\to\\nlweb-mcp` with the actual path to your project.
 
 - **add_nlweb_page**: Add a new page to the database
 - **update_nlweb_page**: Update an existing page
-- **get_nlweb_page**: Get a specific page by ID
-- **list_nlweb_pages**: List all stored pages
+- **get_nlweb_page**: Get a page by ID
+- **list_nlweb_pages**: List all saved pages
 - **search_nlweb_pages**: Search pages by title, description, tags, or URL
 - **delete_nlweb_page**: Delete a page by ID
 
-### Testing & Monitoring
+### Page Queries
 
-- **test_nlweb_page**: Test a specific page for accessibility and performance
-- **health_check_all_pages**: Perform health check on all stored pages
+- **ask_nlweb_page**: Send a query to a selected page (e.g., summarize or generate text based on the page content)
 
 ## Database Schema
 
@@ -96,13 +68,14 @@ CREATE TABLE nlweb_pages (
 
 ## Example Usage
 
-Once integrated with Claude Desktop, you can use natural language commands like:
+Once integrated with Claude Desktop, you can use commands like:
 
-- "Add a new nlweb page for https://example.com with title 'Example Site'"
-- "Test the page https://example.com"
-- "Show me all pages with 'blog' in the title"
-- "Run a health check on all my pages"
-- "Update page 1 to mark it as inactive"
+- "Add page https://example.com with title 'Example Site'"
+- "Search for pages containing 'blog' in the title"
+- "Update page 1, set status to 'inactive'"
+- "Delete page with ID 2"
+- "Ask the page https://example.com: Summarize the article"
+- "The previous answer was incomplete, continue for the same page"
 
 ## Development
 
@@ -111,8 +84,7 @@ Once integrated with Claude Desktop, you can use natural language commands like:
 ```
 src/
 ├── index.ts          # Main MCP server implementation
-├── database.ts       # SQLite database operations
-└── nlweb-tester.ts   # Page testing functionality
+└── database.ts       # SQLite database operations
 ```
 
 ### Scripts

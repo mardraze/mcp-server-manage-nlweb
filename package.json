@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-manage-nlweb",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for managing nlweb pages with SQLite storage",
   "main": "dist/index.js",
   "type": "module",
@@ -9,6 +9,9 @@
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "test": "jest"
+  },
+  "bin": {
+    "mcp-server-manage-nlweb": "./dist/index.js"
   },
   "keywords": ["mcp", "nlweb", "sqlite", "typescript"],
   "author": "",
